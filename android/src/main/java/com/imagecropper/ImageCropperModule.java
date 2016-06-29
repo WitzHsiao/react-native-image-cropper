@@ -6,6 +6,7 @@ import android.net.Uri;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -20,7 +21,7 @@ import java.util.UUID;
  * Created by witzhsiao on 6/28/16.
  */
 public class ImageCropperModule extends ReactContextBaseJavaModule implements ActivityEventListener {
-    private Promise mCropperPromise;
+    Callback mCallback;
     private Activity activity;
     WritableMap response;
 
@@ -46,8 +47,7 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
     }
 
     @ReactMethod
-    public void open(String uriString, Double width, Double height, final Promise promise) {
-        mCropperPromise = promise;
+    public void open(String uriString, Double width, Double height, Callback callback) {
         UCrop.Options options = new UCrop.Options();
         activity = getCurrentActivity();
         Uri uri = Uri.parse(uriString);
@@ -61,23 +61,23 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        response = Arguments.createMap();
-        // user cancel
-        if (resultCode != Activity.RESULT_OK) {
-            mCropperPromise.reject(E_USER_CANCEL, "User cancelled");
-            return;
-        }
-
-        if (resultCode == Activity.RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
-            final Uri resultUri = UCrop.getOutput(data);
-            if (resultUri != null) {
-                response.putString("uri", resultUri.toString());
-                mCropperPromise.resolve(response);
+        if (mCallback != null) {
+            response = Arguments.createMap();
+            if (resultCode != Activity.RESULT_OK) {
+                response.putBoolean("success", false);
+                response.putString("code", E_USER_CANCEL);
+                mCallback.invoke(response);
             } else {
-                mCropperPromise.reject(E_NO_IMAGE_DATA_FOUND, "Cannot find image data");
+                final Uri resultUri = UCrop.getOutput(data);
+                if (resultUri != null) {
+                    response.putBoolean("success", true);
+                    response.putString("uri", resultUri.toString());
+                    mCallback.invoke(response);
+                } else {
+                    response.putBoolean("success", true);
+                    response.putString("code", E_NO_IMAGE_DATA_FOUND);
+                }
             }
-        } else if (resultCode == UCrop.RESULT_ERROR) {
-            mCropperPromise.reject(UCrop.getError(data));
         }
     }
 }
