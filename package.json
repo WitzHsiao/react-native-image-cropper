@@ -1,5 +1,5 @@
 {
-  "name": "ImageCropper",
+  "name": "react-native-image-cropper",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -11,5 +11,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/WitzHsiao/react-native-image-cropper.git"
-  },
+  }
 }
