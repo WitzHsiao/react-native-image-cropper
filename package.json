@@ -5,9 +5,6 @@
   "scripts": {
     "start": "node node_modules/react-native/local-cli/cli.js start"
   },
-  "peerDependencies": {
-    "react-native": "0.28.0"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/WitzHsiao/react-native-image-cropper.git"

@@ -41,11 +41,12 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     @Override
     public String getName() {
-        return "ImageCropper";
+        return "ImageCropperManager";
     }
 
     @ReactMethod
     public void open(String uriString, Double width, Double height, final Promise promise) {
+        mCropperPromise = promise;
         UCrop.Options options = new UCrop.Options();
         activity = getCurrentActivity();
         Uri uri = Uri.parse(uriString);
