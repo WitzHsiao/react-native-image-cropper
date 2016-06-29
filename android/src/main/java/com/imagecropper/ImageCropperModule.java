@@ -41,7 +41,7 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     @Override
     public String getName() {
-        return "ImageCropperManager";
+        return "ImageCropper";
     }
 
     @ReactMethod
