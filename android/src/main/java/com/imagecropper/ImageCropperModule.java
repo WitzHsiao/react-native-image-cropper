@@ -37,6 +37,7 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     public ImageCropperModule(ReactApplicationContext reactContext) {
         super(reactContext);
+        reactContext.addActivityEventListener(this);
     }
 
     @Override
@@ -64,6 +65,7 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
         // user cancel
         if (resultCode != Activity.RESULT_OK) {
             mCropperPromise.reject(E_USER_CANCEL, "User cancelled");
+            return;
         }
 
         if (resultCode == Activity.RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
