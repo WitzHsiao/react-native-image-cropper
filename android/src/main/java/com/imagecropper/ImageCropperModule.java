@@ -21,7 +21,7 @@ import java.util.UUID;
  * Created by witzhsiao on 6/28/16.
  */
 public class ImageCropperModule extends ReactContextBaseJavaModule implements ActivityEventListener {
-    private Callback mCallback;
+    private Promise mPromise;
     private Activity mActivity;
     private ReactApplicationContext mReactContext;
     WritableMap response;
@@ -50,8 +50,8 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
     }
 
     @ReactMethod
-    public void open(String uriString, Double width, Double height, Callback callback) {
-        mCallback = callback;
+    public void open(String uriString, Double width, Double height, Promise promise) {
+        mPromise = promise;
         UCrop.Options options = new UCrop.Options();
         Uri uri = Uri.parse(uriString);
 
@@ -64,22 +64,14 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (mCallback != null) {
+        if (mPromise != null) {
             response = Arguments.createMap();
-            if (resultCode != Activity.RESULT_OK) {
-                response.putBoolean("success", false);
-                response.putString("code", E_USER_CANCEL);
-                mCallback.invoke(response);
-            } else {
+            if (resultCode == Activity.RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
                 final Uri resultUri = UCrop.getOutput(data);
-                if (resultUri != null) {
-                    response.putBoolean("success", true);
-                    response.putString("uri", resultUri.toString());
-                    mCallback.invoke(response);
-                } else {
-                    response.putBoolean("success", true);
-                    response.putString("code", E_NO_IMAGE_DATA_FOUND);
-                }
+                response.putString("uri", resultUri.toString());
+                mPromise.resolve(response);
+            } else if (resultCode == UCrop.RESULT_ERROR) {
+                mPromise.reject("error", UCrop.getError(data));
             }
         }
     }
