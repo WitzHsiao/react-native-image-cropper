@@ -21,8 +21,9 @@ import java.util.UUID;
  * Created by witzhsiao on 6/28/16.
  */
 public class ImageCropperModule extends ReactContextBaseJavaModule implements ActivityEventListener {
-    Callback mCallback;
-    private Activity activity;
+    private Callback mCallback;
+    private Activity mActivity;
+    private ReactApplicationContext mReactContext;
     WritableMap response;
 
     private static final String E_USER_CANCEL="E_USER_CANCEL";
@@ -36,8 +37,10 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 //        return constants;
 //    }
 
-    public ImageCropperModule(ReactApplicationContext reactContext) {
+    public ImageCropperModule(ReactApplicationContext reactContext, Activity activity) {
         super(reactContext);
+        mActivity = activity;
+        mReactContext = reactContext;
         reactContext.addActivityEventListener(this);
     }
 
@@ -48,14 +51,14 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     @ReactMethod
     public void open(String uriString, Double width, Double height, Callback callback) {
+        mCallback = callback;
         UCrop.Options options = new UCrop.Options();
-        activity = getCurrentActivity();
         Uri uri = Uri.parse(uriString);
 
-        UCrop.of(uri, Uri.fromFile(new File(activity.getCacheDir(), UUID.randomUUID().toString() + ".jpg")))
+        UCrop.of(uri, Uri.fromFile(new File(mReactContext.getCacheDir(), UUID.randomUUID().toString() + ".jpg")))
                 .withAspectRatio(width.floatValue(), height.floatValue())
                 .withOptions(options)
-                .start(activity);
+                .start(mActivity);
     }
 
 

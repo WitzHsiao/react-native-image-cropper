@@ -1,5 +1,7 @@
 package com.imagecropper;
 
+import android.app.Activity;
+
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -15,9 +17,16 @@ import java.util.List;
  * Created by witzhsiao on 6/28/16.
  */
 public class ImageCropperPackage implements ReactPackage {
+    private Activity mActivity;
+
+    public ImageCropperPackage(Activity activity) {
+        super();
+        mActivity = activity;
+    }
+
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new ImageCropperModule(reactContext));
+        return Arrays.<NativeModule>asList(new ImageCropperModule(reactContext, mActivity));
     }
 
     @Override
