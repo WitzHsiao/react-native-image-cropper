@@ -37,9 +37,9 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 //        return constants;
 //    }
 
-    public ImageCropperModule(ReactApplicationContext reactContext, Activity activity) {
+    public ImageCropperModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        mActivity = activity;
+        mActivity = getCurrentActivity();
         mReactContext = reactContext;
         reactContext.addActivityEventListener(this);
     }

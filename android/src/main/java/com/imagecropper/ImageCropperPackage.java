@@ -17,16 +17,14 @@ import java.util.List;
  * Created by witzhsiao on 6/28/16.
  */
 public class ImageCropperPackage implements ReactPackage {
-    private Activity mActivity;
 
-    public ImageCropperPackage(Activity activity) {
+    public ImageCropperPackage() {
         super();
-        mActivity = activity;
     }
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new ImageCropperModule(reactContext, mActivity));
+        return Arrays.<NativeModule>asList(new ImageCropperModule(reactContext));
     }
 
     @Override
