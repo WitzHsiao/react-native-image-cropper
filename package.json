@@ -9,5 +9,8 @@
     "type": "git",
     "url": "https://github.com/WitzHsiao/react-native-image-cropper.git"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "peerDependency": {
+    "react-native": "0.30"
+  }
 }
