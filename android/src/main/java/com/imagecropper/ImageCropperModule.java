@@ -22,7 +22,6 @@ import java.util.UUID;
  */
 public class ImageCropperModule extends ReactContextBaseJavaModule implements ActivityEventListener {
     private Promise mPromise;
-    private Activity mActivity;
     private ReactApplicationContext mReactContext;
     WritableMap response;
 
@@ -39,7 +38,6 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
 
     public ImageCropperModule(ReactApplicationContext reactContext) {
         super(reactContext);
-        mActivity = getCurrentActivity();
         mReactContext = reactContext;
         reactContext.addActivityEventListener(this);
     }
@@ -54,11 +52,16 @@ public class ImageCropperModule extends ReactContextBaseJavaModule implements Ac
         mPromise = promise;
         UCrop.Options options = new UCrop.Options();
         Uri uri = Uri.parse(uriString);
+        Activity activity = getCurrentActivity();
+        if (activity == null) {
+            promise.reject("error", "Cannot find activity");
+            return;
+        }
 
         UCrop.of(uri, Uri.fromFile(new File(mReactContext.getCacheDir(), UUID.randomUUID().toString() + ".jpg")))
                 .withAspectRatio(width.floatValue(), height.floatValue())
                 .withOptions(options)
-                .start(mActivity);
+                .start(activity);
     }
 
 
