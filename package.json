@@ -11,6 +11,6 @@
   },
   "main": "index.js",
   "peerDependency": {
-    "react-native": "0.30"
+    "react-native": ">= 0.29"
   }
 }
