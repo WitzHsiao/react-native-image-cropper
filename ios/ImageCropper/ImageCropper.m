@@ -17,12 +17,12 @@ RCT_EXPORT_METHOD(open:(NSString *)uri
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  self.width = width;
-  self.height = height;
-  self.resolve = resolve;
-  self.reject = reject;
+  _width = width;
+  _height = height;
+  _resolve = resolve;
+  _reject = reject;
   
-  UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:uri]];
+  UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:uri]]];
   RSKImageCropViewController *imageCropVC = [[RSKImageCropViewController alloc] initWithImage:image cropMode:RSKImageCropModeCustom];
   imageCropVC.dataSource = self;
   imageCropVC.delegate = self;
@@ -35,6 +35,22 @@ RCT_EXPORT_METHOD(open:(NSString *)uri
       [root presentViewController:imageCropVC animated:YES completion:nil];
     }
   });
+}
+
+// at the moment it is not possible to upload image by reading PHAsset
+// we are saving image and saving it to the tmp location where we are allowed to access image later
+- (NSString*) persistFile:(NSData*)data {
+  // create temp file
+  NSString *filePath = [NSTemporaryDirectory() stringByAppendingString:[[NSUUID UUID] UUIDString]];
+  filePath = [filePath stringByAppendingString:@".jpg"];
+  
+  // save cropped file
+  BOOL status = [data writeToFile:filePath atomically:YES];
+  if (!status) {
+    return nil;
+  }
+  
+  return filePath;
 }
 
 #pragma mark - RSKImageCropViewControllerDelegate
@@ -50,29 +66,21 @@ RCT_EXPORT_METHOD(open:(NSString *)uri
                    didCropImage:(UIImage *)croppedImage
                   usingCropRect:(CGRect)cropRect
 {
+  NSString *filePath = [self persistFile:UIImagePNGRepresentation(croppedImage)];
+  if (filePath == nil) {
+    self.reject(@"error", @"Cannot save image. Unable to write to tmp location.", nil);
+    return;
+  }
+  
+  NSDictionary *image = @{
+                          @"uri": filePath,
+                          @"width": @(croppedImage.size.width),
+                          @"height": @(croppedImage.size.height),
+                          };
+  
+  self.resolve(image);
   [controller dismissViewControllerAnimated:YES completion:nil];
-//  self.imageView.image = croppedImage;
-//  [self.navigationController popViewControllerAnimated:YES];
 }
-
-// The original image has been cropped. Additionally provides a rotation angle used to produce image.
-- (void)imageCropViewController:(RSKImageCropViewController *)controller
-                   didCropImage:(UIImage *)croppedImage
-                  usingCropRect:(CGRect)cropRect
-                  rotationAngle:(CGFloat)rotationAngle
-{
-  [controller dismissViewControllerAnimated:YES completion:nil];
-//  self.imageView.image = croppedImage;
-//  [self.navigationController popViewControllerAnimated:YES];
-}
-
-//// The original image will be cropped.
-//- (void)imageCropViewController:(RSKImageCropViewController *)controller
-//                  willCropImage:(UIImage *)originalImage
-//{
-//  // Use when `applyMaskToCroppedImage` set to YES.
-//  [SVProgressHUD show];
-//}
 
 #pragma mark - RSKImageCropViewControllerDataSource
 
@@ -83,13 +91,44 @@ RCT_EXPORT_METHOD(open:(NSString *)uri
   return controller.maskRect;
 }
 
+// Returns a custom path for the mask.
+- (UIBezierPath *)imageCropViewControllerCustomMaskPath:(RSKImageCropViewController *)controller
+{
+  CGRect rect = controller.maskRect;
+  CGPoint point1 = CGPointMake(CGRectGetMinX(rect), CGRectGetMinY(rect));
+  CGPoint point2 = CGPointMake(CGRectGetMaxX(rect), CGRectGetMinY(rect));
+  CGPoint point3 = CGPointMake(CGRectGetMaxX(rect), CGRectGetMaxY(rect));
+  CGPoint point4 = CGPointMake(CGRectGetMinX(rect), CGRectGetMaxY(rect));
+  
+  UIBezierPath *rectangle = [UIBezierPath bezierPath];
+  [rectangle moveToPoint:point1];
+  [rectangle addLineToPoint:point2];
+  [rectangle addLineToPoint:point3];
+  [rectangle addLineToPoint:point4];
+  [rectangle closePath];
+  
+  return rectangle;
+}
+
 // Returns a custom rect for the mask.
 - (CGRect)imageCropViewControllerCustomMaskRect:(RSKImageCropViewController *)controller
 {
-  CGSize maskSize = CGSizeMake(200*_width, 200*_height);
-  
   CGFloat viewWidth = CGRectGetWidth(controller.view.frame);
   CGFloat viewHeight = CGRectGetHeight(controller.view.frame);
+  
+  CGSize maskSize;
+  int baseRectSize = 0;
+  
+  if (_height > _width)
+  {
+    baseRectSize = viewHeight * 0.6 *1.2;
+    maskSize = CGSizeMake(baseRectSize*0.65, baseRectSize);
+  }
+  else
+  {
+    baseRectSize = viewWidth * 0.8 *1.2;
+    maskSize = CGSizeMake(baseRectSize, baseRectSize*0.65);
+  }
   
   CGRect maskRect = CGRectMake((viewWidth - maskSize.width) * 0.5f,
                                (viewHeight - maskSize.height) * 0.5f,
