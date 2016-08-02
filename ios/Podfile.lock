@@ -1,0 +1,22 @@
+PODS:
+  - React (0.28.0):
+    - React/Core (= 0.28.0)
+  - React/Core (0.28.0)
+  - RSKImageCropper (1.5.1)
+  - SVProgressHUD (2.0.3)
+
+DEPENDENCIES:
+  - React (from `../node_modules/react-native`)
+  - RSKImageCropper (~> 1.5.1)
+  - SVProgressHUD (~> 2.0.3)
+
+EXTERNAL SOURCES:
+  React:
+    :path: "../node_modules/react-native"
+
+SPEC CHECKSUMS:
+  React: 43544faed4af6a0e8fbc4b3abd26141ed654fa49
+  RSKImageCropper: edd65fedb3734332818deb139906d6b7f54b8a44
+  SVProgressHUD: b0830714205bea1317ea1a2ebc71e5633af334d4
+
+COCOAPODS: 0.39.0

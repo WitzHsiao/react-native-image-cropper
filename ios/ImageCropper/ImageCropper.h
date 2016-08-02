@@ -21,6 +21,10 @@ RSKImageCropViewControllerDataSource>
 @property (nonatomic, strong) RCTPromiseResolveBlock resolve;
 @property (nonatomic, strong) RCTPromiseRejectBlock reject;
 
+@property (nonatomic, strong) float width;
+@property (nonatomic, strong) float height;
+
+
 @end
 
 #endif

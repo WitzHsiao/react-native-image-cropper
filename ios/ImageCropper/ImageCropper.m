@@ -8,23 +8,24 @@
 
 #import "ImageCropper.h"
 
-@implementation ImageCropper {
-  float _width,
-  float _height
-}
-
+@implementation ImageCropper
 RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(open:(NSString *)uri
                   width:(float)width
-                  height:(float)height)
+                  height:(float)height
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
+  self.width = width;
+  self.height = height;
+  self.resolve = resolve;
+  self.reject = reject;
+  
   UIImage *image = [UIImage imageWithData:[NSData dataWithContentsOfURL:uri]];
   RSKImageCropViewController *imageCropVC = [[RSKImageCropViewController alloc] initWithImage:image cropMode:RSKImageCropModeCustom];
   imageCropVC.dataSource = self;
   imageCropVC.delegate = self;
-  _width = width;
-  _height = height;
   
   UIViewController *root = [[[[UIApplication sharedApplication] delegate] window] rootViewController];
   dispatch_async(dispatch_get_main_queue(), ^{
